@@ -151,7 +151,7 @@ readoutPointMatrix = Array2D.fromArray(2,6,[
 
 // construct our 2-string system and calculate its modal data (this can take a second or two
 // depending on the available computing power)
-~network = FDObjNetwork(objs,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix).calcModes
+~network = FDObjNetwork(objs,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix).calcModes(gain:30.dbamp)
 )
 
 // post all normal mode frequencies and t60 decay times of the first string in response to exciting it
@@ -222,8 +222,8 @@ s.waitForBoot({
 
 (
 s.makeBundle(nil,{
-	x = Synth(\string1_left,[\inBus,10,\outBus,0],1,\addToTail);
-	y = Synth(\string1_right,[\inBus,10,\outBus,1],1,\addToTail);
+	x = Synth(\string1_left,[\inBus,10,\outBus,0,\outputGain,5],1,\addToTail);
+	y = Synth(\string1_right,[\inBus,10,\outBus,1,\outputGain,5],1,\addToTail);
 	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
 })
 )
@@ -259,8 +259,8 @@ oddInd = (1,3..~network.modalData.modeFreqs[0][0].lastIndex);
 
 (
 s.makeBundle(nil,{
-	x = Synth(\string1_left2,[\inBus,10,\outBus,0,\outputGain,2],1,\addToTail);
-	y = Synth(\string1_right2,[\inBus,10,\outBus,1,\outputGain,2],1,\addToTail);
+	x = Synth(\string1_left2,[\inBus,10,\outBus,0,\outputGain,10],1,\addToTail);
+	y = Synth(\string1_right2,[\inBus,10,\outBus,1,\outputGain,10],1,\addToTail);
 	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
 })
 )
@@ -295,8 +295,8 @@ x.free; y.free; z.free
 
 (
 s.makeBundle(nil,{
-	x = Synth(\string2_left,[\inBus,10,\outBus,0,\outputGain,2],1,\addToTail);
-	y = Synth(\string2_right,[\inBus,10,\outBus,1,\outputGain,2],1,\addToTail);
+	x = Synth(\string2_left,[\inBus,10,\outBus,0,\outputGain,10],1,\addToTail);
+	y = Synth(\string2_right,[\inBus,10,\outBus,1,\outputGain,10],1,\addToTail);
 	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
 })
 )
@@ -330,8 +330,8 @@ x.free; y.free; z.free
 
 (
 s.makeBundle(nil,{
-	x = Synth(\string1_left3,[\inBus,10,\outBus,0,\outputGain,4],1,\addToTail);
-	y = Synth(\string1_right3,[\inBus,10,\outBus,1,\outputGain,4],1,\addToTail);
+	x = Synth(\string1_left3,[\inBus,10,\outBus,0,\outputGain,10],1,\addToTail);
+	y = Synth(\string1_right3,[\inBus,10,\outBus,1,\outputGain,10],1,\addToTail);
 	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
 })
 )
@@ -365,8 +365,8 @@ x.free; y.free; z.free
 
 (
 s.makeBundle(nil,{
-	x = Synth(\string12_left,[\inBus,10,\outBus,0,\outputGain,1],1,\addToTail);
-	y = Synth(\string12_right,[\inBus,10,\outBus,1,\outputGain,1],1,\addToTail);
+	x = Synth(\string12_left,[\inBus,10,\outBus,0,\outputGain,5],1,\addToTail);
+	y = Synth(\string12_right,[\inBus,10,\outBus,1,\outputGain,5],1,\addToTail);
 	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
 })
 )
@@ -428,7 +428,7 @@ readoutPointMatrix = Array2D.fromArray(3,6,[
 
 // construct our 3-object system and calculate its modal data (this can take a second or two
 // depending on the available computing power)
-~network = FDObjNetwork(objs,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix).calcModes
+~network = FDObjNetwork(objs,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix).calcModes(gain:24.dbamp)
 )
 
 // we can save the calculated modal data if we want
@@ -469,8 +469,8 @@ SynthDef(\bandNoise,{ arg outBus = 0,amp = 1,freqLo = 50,freqHi = 12000,freqModT
 
 (
 s.makeBundle(nil,{
-	x = Synth(\plate1_left,[\inBus,10,\outBus,0,\outputGain,0.15],1,\addToTail);
-	y = Synth(\plate1_right,[\inBus,10,\outBus,1,\outputGain,0.15],1,\addToTail);
+	x = Synth(\plate1_left,[\inBus,10,\outBus,0,\outputGain,1],1,\addToTail);
+	y = Synth(\plate1_right,[\inBus,10,\outBus,1,\outputGain,1],1,\addToTail);
 	z = Synth(\bandNoise,[\outBus,10],1,\addToHead)
 })
 )
