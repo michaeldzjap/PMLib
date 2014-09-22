@@ -1,0 +1,43 @@
+TITLE:: FDStringDesc
+SUMMARY:: describes the physical properties of a linear string with stiffness and loss
+CATEGORIES:: Physical Modelling, Sound Synthesis
+RELATED:: Classes/FDObjNetworkDesc
+
+DESCRIPTION::
+CODE::FDStringDesc:: is a description of a stiff, linear string with loss. If CODE::gamma:: is zero the object represent the description of a thin, linear bar with loss instead.
+
+CLASSMETHODS::
+
+METHOD:: new
+Create a new instance of CODE::FDStringDesc::.
+
+ARGUMENT:: gamma
+A LINK::Classes/SimpleNumber:: denoting the spatially scaled wavespeed.
+
+ARGUMENT:: kappa
+A LINK::Classes/SimpleNumber:: denoting a spatially scaled stiffness parameter.
+
+ARGUMENT:: b1
+A LINK::Classes/SimpleNumber:: denoting a frequency independent damping constant.
+
+ARGUMENT:: b2
+A LINK::Classes/SimpleNumber:: denoting a frequency dependent damping constant.
+
+returns:: A new instance of CODE::FDStringDesc::.
+
+INSTANCEMETHODS::
+
+METHOD:: pythonString
+Generate a string which can be intepretated as a valid Python object.
+
+returns:: A LINK::Classes/String:: representing an equivalent Python object.
+
+EXAMPLES::
+
+CODE::
+// create a new instance of FDStringDesc with given physical parameters and print the corresponding python object as a string
+(
+var stringDesc = FDStringDesc(200,1,0.698698,0.001515,\bothClamped);
+stringDesc.pythonString
+)
+::

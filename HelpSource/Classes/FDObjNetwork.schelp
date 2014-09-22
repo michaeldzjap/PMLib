@@ -1,0 +1,479 @@
+TITLE:: FDObjNetwork
+SUMMARY:: create a network of inter-connected 1D and 2D objects
+CATEGORIES:: Physical Modelling, Sound Synthesis
+RELATED:: Classes/FDStringDesc
+
+DESCRIPTION::
+CODE::FDObjNetwork:: allows one to assemble a system of inter-connected objects in the form of strings, bars, membranes and plates. Once a network has been specified, its normal mode frequencies may be calculated from the eigenvalues associated with the system. These may be obtained from diagonalising its state space representation. This is accomplished using a hybrid finite difference / modal method approach implemented in the Python programming language with the help of the NumPy and SciPy packages.
+
+WARNING::This class has only been tested to work on OSX. Although it may work prefectly well on other platforms provided that a suitable version of Python 2.7.x and the packages NumPy and SciPy have been installed, no guarantees are given. The default Python path is set as SOFT::"/Library/Frameworks/Python.framework/Versions/Current/bin".:: This might have to be set to a different location if CODE::FDObjNetwork:: is unable to calculate any modal data despite having set up Python, NumPy and SciPy correctly.
+::
+
+CLASSMETHODS::
+
+METHOD:: new
+Create a system of inter-connected objects according to the specification of the arguments.
+
+ARGUMENT:: objDescs
+An LINK::Classes/Array:: containing instances of LINK::Classes/FDStringDesc:: representing the objects which make up the system.
+
+ARGUMENT:: connPointMatrix
+An LINK::Classes/Array2D:: containing CODE::m:: rows and CODE::n:: columns, where CODE::m:: needs to be equal to the number of items in CODE::objDesc:: and CODE::n:: is equal to the total number of object inter-connections. Each column of CODE::connPointMatrix:: should only contain two nonzero entrees, where the first entree denotes the relative point (0 - 1) of inter-connection as seen from the first object and the second entree denotes the relative point of inter-connection as seen from the second object involved in the inter-connection. Note that a value of 0 is not considered to denote a connection point. If one requires to connect one of the objects at relative position 0, one can simply enter a very small, but nonzero value instead (e.g. 0.001).
+
+ARGUMENT:: massMatrix
+An LINK::Classes/Array2D:: containing CODE::m:: rows and CODE::n:: columns, where CODE::m:: needs to be equal to the number of items in CODE::objDesc:: and CODE::n:: is equal to the total number of object inter-connections. As such the shape of CODE::massMatrix:: is equal to the shape of CODE::objDescs::. Each column of CODE::massMatrix:: should only contain two nonzero entrees, where the first entree denotes the mass of the first object and the second entree denotes the mass of the second object involved in the inter-connection. Note that the quantity which matters only in the end is the mass ratio of the two objects and hence the interpretation of the individual entree values is arbitrary.
+
+ARGUMENT:: excPointMatrix
+An LINK::Classes/Array2D:: containing CODE::m:: rows and CODE::n:: columns, where CODE::m:: needs to be equal to the number of items in CODE::objDesc:: and CODE::n:: is equal to the number of distinct excitations to be executed. Note that it is possible to excite multiple objects making up the complete system at the same time by having more than one nonzero entrees in a column.
+
+ARGUMENT:: readoutPointMatrix
+An LINK::Classes/Array2D:: containing CODE::m:: rows and CODE::n:: columns, where CODE::m:: needs to be equal to the number of items in CODE::objDesc:: and CODE::n:: is equal to the number of distinct readouts to be executed. Note that is possible to pick up the sum of the vibrational response of multiple objects making up the complete system by having more than one nonzero entrees in a column.
+
+returns:: An instance of CODE::FDObjNetwork:: with the given objects, mass matrix, matrices describing the positions of object inter-connection and matrices for the excitation and readout points of the resulting system as instance variables.
+
+METHOD:: loadObjNetwork
+This method is convenient for re-using previously computed systems as one can simply read in the stored modal data associated with it instead of having to re-calculate this every time it is required.
+
+ARGUMENT:: pathname
+A LINK::Classes/String:: denoting the location of a file describing the full state of a system of inter-connected objects which has been saved to disk previously using the instance method CODE::saveObjNetwork::.
+
+returns:: An instance of CODE::FDObjNetwork:: which represents a system of inter-connected objects which has been saved to disk previously using the instance method CODE::saveObjNetwork::.
+
+METHOD:: pythonPath
+Class variable which points to a valid version of Python 2.7.x. Set this to a different path if necessary (see below).
+
+ARGUMENT:: value
+A LINK::Classes/String:: denoting the location of Python. It is essential to point this to the right location of a valid Python version, otherwise the instance method CODE::calcModes:: will fail to compute any modal data. The default path is set to the location of the currently used Python version, which on OSX 10.9.4 is equal to SOFT::"/Library/Frameworks/Python.framework/Versions/Current/bin"::.
+
+returns:: A LINK::Classes/String:: which points to the path denoting the current location of Python.
+
+INSTANCEMETHODS::
+
+PRIVATE:: connPointMatrix
+PRIVATE:: excPointMatrix
+PRIVATE:: massMatrix
+PRIVATE:: objDescs
+PRIVATE:: readoutPointMatrix
+PRIVATE:: prCheckMatrixDimensions
+PRIVATE:: prParsePythonOutput
+PRIVATE:: prParseSCArgs
+PRIVATE:: prSetNetworkSettings
+
+METHOD:: calcModes
+Calculate all modal data associated with the system of inter-connected objects.
+
+NOTE::
+The purpose of the arguments is to be able to obtain more efficient simulations by providing the user with some control over which modes to synthesize and which ones to leave out. If one is unsure about what to set these arguments to, it is adviced to just leave them at their default values.
+::
+
+ARGUMENT:: eps
+All numerator coefficients of the second order sections which have a magnitude below CODE::eps:: will be removed from the array corresponding to a particular transfer function. Hence, modes which have a negligible amplitude will be discarded from the simulation. In general one can ignore this argument and just leave it to its default value.
+
+ARGUMENT:: minFreq
+The filter coefficients of the second order sections which correspond to a mode which frequency is below CODE::minFreq:: will be removed from the array corresponding to a particular transfer function. Hence, modes which frequency is lower than CODE::minFreq:: will be discarded from the simulation.
+
+ARGUMENT:: maxFreq
+The filter coefficients of the second order sections which correspond to a mode which frequency is above CODE::maxFreq:: will be removed from the array corresponding to a particular transfer function. Hence, modes which frequency is higher than CODE::maxFreq:: will be discarded from the simulation.
+
+ARGUMENT:: gain
+Some transfer functions may turn out to have small numerator coefficients over the whole, which will result in simulations which are very quiet. One solution would be to feed the parallel bank of second order sections implementing this transfer function a high amplitude excitation signal. However, as we in general prefer audio signals to be in a sensible range, another (perhaps more correct) solution is to boost the gain of the second order sections instead. Hence, the additional gain parameter. Note that this parameter is unrelated to the CODE::eps:: parameter as CODE::gain:: applies to boosting the magnitude of all numerator coefficients, whereas CODE::eps:: offers a means for filtering out low amplitude modes and leaving the other modes unaffected. Again, if one is unsure how to use this parameter, it is adviced to leave it as it is. If it turns out the response of a given transfer function is very quiet, one can always increase the gain of the second order section ugens during the simulation (which will have exactly the same effect).
+
+DISCUSSION::
+The calculation of the modal data roughly involves the following seven steps:
+NUMBEREDLIST::
+## Parsing the system described by an instance of CODE::FDObjNetwork:: into a string representing valid Python code and writing this string to a temporary file on disk.
+## Calling CODE::systemCmd:: to run a Python script which will read in and interpretate the string to convert it into a legal Python statement for setting up a finite difference representation of the system using Python objects.
+## Assembling the separate finite difference matrices representing the individual objects into a state transition block matrix taking into account all object inter-connections.
+## Diagonalising the state transition block matrix in order to obtain all eigenvalues and eigenvectors associated with the diagonalised system.
+## Using the eigenvalues and eigenvectors together with the transformed input and output matrices to calculate the transfer function matrix associated with the system.
+## Writing the transfer function matrix (i.e. a matrix of which every entree consists of an array of second order section coefficients), modal frequencies and t60 decay times to a temporary file.
+## Reading the modal data stored in the temporary file back into SuperCollider, do some additional filtering and structuring on the data based on the first three arguments supplied to CODE::calcModes:: and store the result in the instance variable CODE::modalData::.
+::
+CODE::calcModes:: doesn't return the modal data explicitly. Instead this is saved internally in the instance variable CODE::modalData:: which itself is an instance of the class LINK::Classes/ModalData::. This is done so that it is easier for the user to save the complete state of the system of inter-connected objects with the help of instance method CODE::saveObjNetwork::.
+
+METHOD:: saveObjNetwork
+Save the complete state of the system of inter-connected objects to disk, so that it can be later recalled using class method CODE::loadObjNetwork::. This avoids the need to re-calculate the modal data associated with the system if one requires it again during a subsequent session. This is convenient as in the case of more complex systems the calculation of the modal data might take quite some time.
+
+ARGUMENT:: pathname
+A LINK::Classes/String:: denoting the future location of a file which will fully describe the state of the system of inter-connected objects represented by the current instance of CODE::FDObjNetwork::.
+
+METHOD:: modalData
+An instance of LINK::Classes/ModalData:: which will hold all modal data associated with the current system of inter-connected objects. This instance variable will only be defined after the instance method CODE::calcModes:: has been called successfully on the current instance of CODE::FDObjNetwork::. The instance returned by CODE::modalData:: should be considered to be an immutable object as it only serves as a container for displaying and accessing modal data, not as a means to modify or delete modal data.
+
+EXAMPLES::
+Some examples of how to design and simulate systems of inter-connected objects will be given below with the intent to give a hands on demonstration of how CODE::FDObjNetwork:: can be of practical use.
+
+CODE::
+/*
+ * EXAMPLE 1:
+ * Create a system of two inter-connected strings. The strings are fixed at their left end points and
+ * coupled together at their right end points.
+ */
+
+/*
+***********************
+*PRE-CALCULATION STAGE*
+***********************
+*/
+(
+var objs,massMatrix,connPointMatrix,excPointMatrix,readoutPointMatrix;
+
+// the virtual object descriptions making up our system
+objs = [
+	FDStringDesc(100,0.3,0.698698,0.001515,\leftClampedRightFree),
+	FDStringDesc(200,0.1,0.698698,0.001515,\leftClampedRightFree)
+];
+
+// note that the mass ratio is 1, meaning that an equal amount of energy will flow from string 1 to string 2
+// as from string 2 to string 1 in the ideal lossless case
+massMatrix = Array2D.fromArray(2,1,[
+	1,
+	1
+]);
+
+// string are connected at relative position 1: i.e. their right end points
+connPointMatrix = Array2D.fromArray(2,1,[
+	1,
+	1
+]);
+
+// excite string 1 and 2 separately and both together at a random relative position along their lengths
+excPointMatrix = Array2D.fromArray(2,3,[
+	1.0.rand, 0,        1.0.rand,
+	0,        1.0.rand, 1.0.rand
+]);
+
+// listen to string 1 and 2 separately and both together at a random relative position along their lengths
+readoutPointMatrix = Array2D.fromArray(2,6,[
+	1.0.rand, 1.0.rand, 0,        0,        1.0.rand, 1.0.rand,
+	0,        0,        1.0.rand, 1.0.rand, 1.0.rand, 1.0.rand
+]);
+
+// construct our 2-string system and calculate its modal data (this can take a second or two
+// depending on the available computing power)
+~network = FDObjNetwork(objs,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix).calcModes
+)
+
+// post all normal mode frequencies and t60 decay times of the first string in response to exciting it
+[~network.modalData.modeFreqs[0][0],~network.modalData.t60Times[0][0]].flop do: _.postln
+
+/*
+******************
+*SIMULATION STAGE*
+******************
+*/
+(
+s.waitForBoot({
+	// a synth def template for simulating the string
+	~makeResonatorSynthDef = { arg inA1,inA2,inB1,inB2,synthDefName;
+		SynthDef(synthDefName,{ arg inBus,outBus = 0,inputGain = 1,outputGain = 1,dryWet = 1;
+			var input,output,a1,a2,b1,b2;
+
+			a1 = \a1.ir(inA1);
+			a2 = \a2.ir(inA2);
+			b1 = \b1.ir(inB1);
+			b2 = \b2.ir(inB2);
+			input = In.ar(inBus)*inputGain;
+			output = SOS.ar(input,0,a1,a2,b1,b2).sum*outputGain;
+
+			Out.ar(outBus,(1 - dryWet)*input + (dryWet*output))
+		}).add
+	};
+
+	// very simple strike-type excitation synth def
+	SynthDef(\strike,{ arg outBus = 0,lpFreq = 12000,strikeFreq = 1;
+		var signal = LPF.ar(Impulse.ar(strikeFreq),lpFreq);
+		Out.ar(outBus,signal)
+	}).add
+})
+)
+
+/*
+ * Every excitation / readout point combination is represented by its own transfer function,
+ * and hence needs to be simulated explicitly.  The following example will demonstrate two
+ * different ways of simulating the output of our system as a stereo signal. Method 1 may be
+ * seen as more physically correct, but uses roughly twice the number of modes of method 2
+ */
+
+// method 1: simulate system output by using two different transfer functions for the left and
+// right channels
+
+(
+// simulate first string in response to exciting it and listening to it at a random relative
+// location (use for left channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[0][0],
+	~network.modalData.biquadCoefs.a2[0][0],
+	~network.modalData.biquadCoefs.b1[0][0].neg,
+	~network.modalData.biquadCoefs.b2[0][0].neg,
+	\string1_left
+);
+
+// simulate first string in response to exciting it at the same location, but listening to it
+// at another random relative location (use for right channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[1][0],
+	~network.modalData.biquadCoefs.a2[1][0],
+	~network.modalData.biquadCoefs.b1[1][0].neg,
+	~network.modalData.biquadCoefs.b2[1][0].neg,
+	\string1_right
+)
+)
+
+(
+s.makeBundle(nil,{
+	x = Synth(\string1_left,[\inBus,10,\outBus,0],1,\addToTail);
+	y = Synth(\string1_right,[\inBus,10,\outBus,1],1,\addToTail);
+	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
+})
+)
+
+x.free; y.free; z.free
+
+// method 2: simulate system output by using the same transfer function for the left and right
+// channels by spreading the individual second order sections (i.e. modes) equally over them
+
+(
+var evenInd,oddInd;
+
+// simulate first string in response to exciting it and listening to it at a random relative
+// location (use for both channels)
+evenInd = (0,2..~network.modalData.modeFreqs[0][0].lastIndex);
+oddInd = (1,3..~network.modalData.modeFreqs[0][0].lastIndex);
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[0][0]|@|evenInd,
+	~network.modalData.biquadCoefs.a2[0][0]|@|evenInd,
+	(~network.modalData.biquadCoefs.b1[0][0]|@|evenInd).neg,
+	(~network.modalData.biquadCoefs.b2[0][0]|@|evenInd).neg,
+	\string1_left2
+);
+
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[0][0]|@|oddInd,
+	~network.modalData.biquadCoefs.a2[0][0]|@|oddInd,
+	(~network.modalData.biquadCoefs.b1[0][0]|@|oddInd).neg,
+	(~network.modalData.biquadCoefs.b2[0][0]|@|oddInd).neg,
+	\string1_right2
+)
+)
+
+(
+s.makeBundle(nil,{
+	x = Synth(\string1_left2,[\inBus,10,\outBus,0,\outputGain,2],1,\addToTail);
+	y = Synth(\string1_right2,[\inBus,10,\outBus,1,\outputGain,2],1,\addToTail);
+	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
+})
+)
+
+x.free; y.free; z.free
+
+// simulate system output by using the two transfer functions which correspond to exciting
+// the first string at the same random realtive location as before, but now listen to the
+// response of the second string instead
+
+(
+// simulate second string in response to exciting the first string by listening to it at a random relative
+// location (use for left channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[2][0],
+	~network.modalData.biquadCoefs.a2[2][0],
+	~network.modalData.biquadCoefs.b1[2][0].neg,
+	~network.modalData.biquadCoefs.b2[2][0].neg,
+	\string2_left
+);
+
+// simulate second string in response to exciting the first string at the same location,
+// but listening to it at another random relative location (use for right channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[3][0],
+	~network.modalData.biquadCoefs.a2[3][0],
+	~network.modalData.biquadCoefs.b1[3][0].neg,
+	~network.modalData.biquadCoefs.b2[3][0].neg,
+	\string2_right
+)
+)
+
+(
+s.makeBundle(nil,{
+	x = Synth(\string2_left,[\inBus,10,\outBus,0,\outputGain,2],1,\addToTail);
+	y = Synth(\string2_right,[\inBus,10,\outBus,1,\outputGain,2],1,\addToTail);
+	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
+})
+)
+
+x.free; y.free; z.free
+
+// simulate system output by using the two transfer functions which correspond to exciting the
+// second string at a random realtive location, but now listen to the response of the first string instead
+
+(
+// simulate first string in response to exciting the second string by listening to it at a random relative
+// location (use for left channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[0][1],
+	~network.modalData.biquadCoefs.a2[0][1],
+	~network.modalData.biquadCoefs.b1[0][1].neg,
+	~network.modalData.biquadCoefs.b2[0][1].neg,
+	\string1_left3
+);
+
+// simulate first string in response to exciting the second string at the same location,
+// but listening to it at another random relative location (use for right channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[1][1],
+	~network.modalData.biquadCoefs.a2[1][1],
+	~network.modalData.biquadCoefs.b1[1][1].neg,
+	~network.modalData.biquadCoefs.b2[1][1].neg,
+	\string1_right3
+)
+)
+
+(
+s.makeBundle(nil,{
+	x = Synth(\string1_left3,[\inBus,10,\outBus,0,\outputGain,4],1,\addToTail);
+	y = Synth(\string1_right3,[\inBus,10,\outBus,1,\outputGain,4],1,\addToTail);
+	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
+})
+)
+
+x.free; y.free; z.free
+
+// simulate system output by using the two transfer functions which correspond to exciting both
+// strings at a random realtive location, and listen to the response of both strings
+
+(
+// simulate both strings in response to exciting both strings at a random relative location,
+// and listen to both of them at another random relative location (use for left channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[4][2],
+	~network.modalData.biquadCoefs.a2[4][2],
+	~network.modalData.biquadCoefs.b1[4][2].neg,
+	~network.modalData.biquadCoefs.b2[4][2].neg,
+	\string12_left
+);
+
+// simulate both strings in response to exciting both strings at a random relative location,
+// and listen to both of them at another random relative location (use for right channel)
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[5][2],
+	~network.modalData.biquadCoefs.a2[5][2],
+	~network.modalData.biquadCoefs.b1[5][2].neg,
+	~network.modalData.biquadCoefs.b2[5][2].neg,
+	\string12_right
+)
+)
+
+(
+s.makeBundle(nil,{
+	x = Synth(\string12_left,[\inBus,10,\outBus,0,\outputGain,1],1,\addToTail);
+	y = Synth(\string12_right,[\inBus,10,\outBus,1,\outputGain,1],1,\addToTail);
+	z = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
+})
+)
+
+x.free; y.free; z.free
+
+
+
+/*
+ * EXAMPLE 2:
+ * Create a more complicated system of inter-connected objects. Create two plates which are
+ * inter-connected at a random location along their surface through the two end points of a string.
+ */
+
+/*
+***********************
+*PRE-CALCULATION STAGE*
+***********************
+*/
+(
+var objs,massMatrix,connPointMatrix,excPointMatrix,readoutPointMatrix;
+
+// the virtual object descriptions making up our system
+objs = [
+	FDPlateDesc(0,20,0.61,0.0015,\allSidesClamped,1),
+	FDStringDesc(100,0.3,0.698698,0.001515,\bothClamped),
+	FDPlateDesc(0,50,0.61,0.0015,\allSidesClamped,1),
+];
+
+// note that the mass ratio of the string to both plates is set as 2, meaning that this should increase the
+// transfer of energy from the string to the plates in response to exciting the string as opposed to using
+// an equal mass ratio
+massMatrix = Array2D.fromArray(3,2,[
+	1, 0,
+	5, 5,
+	0, 1
+]);
+
+// connect plates and strings
+connPointMatrix = Array2D.fromArray(3,2,[
+	{1.0.rand}!2, 0,
+	1.0.rand,     1.0.rand,
+	0,            {1.0.rand}!2
+]);
+
+// excite plate 1, the string and plate 2 at a random relative position
+excPointMatrix = Array2D.fromArray(3,3,[
+	{1.0.rand}!2, 0,        0,
+	0,            1.0.rand, 0,
+	0,            0,        {1.0.rand}!2
+]);
+
+// listen to plate 1, the string and plate 2 at a random relative position
+readoutPointMatrix = Array2D.fromArray(3,6,[
+	{1.0.rand}!2, {1.0.rand}!2, 0,        0,        0,            0,
+	0,            0,            1.0.rand, 1.0.rand, 0,            0,
+	0,            0,            0,        0,        {1.0.rand}!2, {1.0.rand}!2
+]);
+
+// construct our 3-object system and calculate its modal data (this can take a second or two
+// depending on the available computing power)
+~network = FDObjNetwork(objs,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix).calcModes
+)
+
+// we can save the calculated modal data if we want
+~network.saveObjNetwork("objectNetwork.scd")
+
+/*
+******************
+*SIMULATION STAGE*
+******************
+*/
+(
+// alternative excitation synth def for continuous excitation (adapted from an sctweet by nathaniel virgo)
+SynthDef(\bandNoise,{ arg outBus = 0,amp = 1,freqLo = 50,freqHi = 12000,freqModT = 3e-02,gate = 1,cutoff = 80;
+	var source = PinkNoise.ar;
+	25 do: { source = BBandStop.ar(source,LFDNoise1.kr(freqModT).exprange(freqLo,freqHi),ExpRand(0.5,1.5)) };
+	Out.ar(outBus,HPF.ar(LPF.ar(source,1e4,amp),cutoff))
+}).add
+)
+
+// simulate output of string in response to exciting the string
+(
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[2][1],
+	~network.modalData.biquadCoefs.a2[2][1],
+	~network.modalData.biquadCoefs.b1[2][1].neg,
+	~network.modalData.biquadCoefs.b2[2][1].neg,
+	\plate1_left
+);
+
+~makeResonatorSynthDef.(
+	~network.modalData.biquadCoefs.a1[3][1],
+	~network.modalData.biquadCoefs.a2[3][1],
+	~network.modalData.biquadCoefs.b1[3][1].neg,
+	~network.modalData.biquadCoefs.b2[3][1].neg,
+	\plate1_right
+)
+)
+
+(
+s.makeBundle(nil,{
+	x = Synth(\plate1_left,[\inBus,10,\outBus,0,\outputGain,0.15],1,\addToTail);
+	y = Synth(\plate1_right,[\inBus,10,\outBus,1,\outputGain,0.15],1,\addToTail);
+	z = Synth(\bandNoise,[\outBus,10],1,\addToHead)
+})
+)
+
+x.free; y.free; z.free
+::
