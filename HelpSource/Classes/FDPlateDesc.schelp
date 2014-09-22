@@ -13,6 +13,9 @@ Create a new instance of CODE::FDPlateDesc::.
 
 ARGUMENT:: gamma
 A LINK::Classes/SimpleNumber:: denoting the spatially scaled wavespeed.
+WARNING::
+Note that it is generally not adviced to use very small, non-zero values for CODE::gamma:: as the smaller the value for CODE::gamma::, the larger the number of modes will be. As a consequence, the calculation time might increase significantly and in the worst case either Python or SuperCollider will choke on the amount of data it needs to process resulting in no modal data at all. A zero value for CODE::gamma:: is perfectly fine though, provided that CODE::kappa:: is non-zero and relatively large (e.g. CODE::kappa > 10::).
+::
 
 ARGUMENT:: kappa
 A LINK::Classes/SimpleNumber:: denoting a spatially scaled stiffness parameter.
