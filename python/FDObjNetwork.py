@@ -229,7 +229,8 @@ class FDObjNetwork(FDObjectBase):
     A = None    # state transtion block matrix
     # loop over all rows (i.e. individual objs) and find all connections with other objs
     for row,i,obj in zip(self.massMatrix,xrange(len(self.objs)),self.objs):
-      fac = 1./(obj.h + obj.b1*k*obj.h)
+      fac = 1./(1 + obj.b1*k)
+      fac /= obj.h**2 if isinstance(obj,FDPlate) else obj.h
       C1_total = csc_matrix((obj.Nm,obj.Nm)); C2_total = csc_matrix((obj.Nm,obj.Nm))
       C3_total = {}; C4_total = {}; A_row = None
       colInds = np.nonzero(row)[0]
@@ -302,8 +303,8 @@ class FDObjNetwork(FDObjectBase):
       E = None
       for rp,obj in zip(col,self.objs):
         if rp > 0.0:
-          e = spdistr2D(1/(k*obj.h**2),rp[0],rp[1],obj.Nx - 1,obj.Ny - 1,flatten=True).T\
-          if isinstance(obj,FDPlate) else spdistr1D(1/(k*obj.h),rp,obj.Nm,'lin').T
+          e = spdistr2D(1/k,rp[0],rp[1],obj.Nx - 1,obj.Ny - 1,flatten=True).T\
+          if isinstance(obj,FDPlate) else spdistr1D(1/k,rp,obj.Nm,'lin').T
           E = hstack((e,-e)) if E == None else hstack((E,e,-e))
         else:
           e = lil_matrix((1,obj.Nm*2))
