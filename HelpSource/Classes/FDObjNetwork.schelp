@@ -1,7 +1,7 @@
 TITLE:: FDObjNetwork
 SUMMARY:: create a network of inter-connected 1D and 2D objects
 CATEGORIES:: Physical Modelling, Sound Synthesis
-RELATED:: Classes/FDStringDesc
+RELATED:: Classes/FDStringDesc, Classes/FDPlateDesc
 
 DESCRIPTION::
 CODE::FDObjNetwork:: allows one to assemble a system of inter-connected objects in the form of strings, bars, membranes and plates. Once a network has been specified, its normal mode frequencies may be calculated from the eigenvalues associated with the system. These may be obtained from diagonalising its state space representation. This is accomplished using a hybrid finite difference / modal method approach implemented in the Python programming language with the help of the NumPy and SciPy packages.
