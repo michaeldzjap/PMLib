@@ -1,0 +1,4 @@
+# ignore all pyc files
+*.pyc
+# ignore everything inside tests directory
+/python/tests
