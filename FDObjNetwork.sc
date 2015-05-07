@@ -114,9 +114,9 @@ FDObjNetwork {
 		this.prCheckMatrixDimensions;
 		this.prParseSCArgs(gain);
 		// have to use systemCmd instead of unixCmd here, since we want synchronous execution
-		("export PATH=" ++ pythonPath ++ ":$PATH && cd" + pythonScriptPath + "&& python systemSetup.py").systemCmd;
+		("export PATH=" ++ pythonPath.shellQuote ++ ":$PATH && cd" + pythonScriptPath.shellQuote + "&& python systemSetup.py").systemCmd;
 		this.prParsePythonOutput;
-		("cd" + pythonScriptPath + "&& rm -rf networkArgs.txt").systemCmd;
+		("cd" + pythonScriptPath.shellQuote + "&& rm -rf networkArgs.txt").systemCmd;
 		modalData.discardModes(eps,minFreq,maxFreq)
 	}
 
@@ -208,7 +208,7 @@ FDObjNetwork {
 		biquadCoefs = (a1:readFunc.value,a2:readFunc.value,b1:readFunc.value,b2:readFunc.value);
 		modeCalcTime = file.getLine.interpret;
 		file.close;
-		("cd" + pythonScriptPath + "&& rm -rf modalData.txt").systemCmd;
+		("cd" + pythonScriptPath.shellQuote + "&& rm -rf modalData.txt").systemCmd;
 		modalData = ModalData(modeFreqs,t60Times,biquadCoefs).modeCalcTime_(modeCalcTime)
 	}
 
