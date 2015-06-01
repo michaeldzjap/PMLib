@@ -4,3 +4,5 @@
 *.pyc
 # ignore everything inside tests directory
 /python/tests
+# ignore any json in /python
+/python/*.json
