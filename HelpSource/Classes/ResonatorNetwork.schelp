@@ -473,3 +473,112 @@ s.makeBundle(nil,{
 
 x.free; y.free; z.free
 ::
+The previous examples all made use of SC's native LINK::Classes/SOS:: UGen for the simulation part. Another option is to use the LINK::Classes/SOSBank:: UGen footnote::"https://github.com/michaeldzjap/SOSBank"::. The next example compares both methods.
+
+CODE::
+/*
+ * EXAMPLE 3:
+ * Create a system of two inter-connected strings. The strings are fixed at their left end points and
+ * coupled together at their right end points.
+ */
+
+/*
+***********************
+*PRE-CALCULATION STAGE*
+***********************
+*/
+(
+var objs,massMatrix,connPointMatrix,excPointMatrix,readoutPointMatrix;
+
+objs = [
+    Resonator1D(100,0.3,0.698698,0.001515,\bothClamped),
+    Resonator1D(200,0.1,0.698698,0.001515,\bothClamped)
+];
+
+massMatrix = Array2D.fromArray(2,1,[
+    1,
+    1
+]);
+
+connPointMatrix = Array2D.fromArray(2,1,[
+    0.345,
+    0.678
+]);
+
+
+excPointMatrix = Array2D.fromArray(2,2,[
+    1.0.rand, 0,
+    0,        1.0.rand
+]);
+
+readoutPointMatrix = Array2D.fromArray(2,3,[
+    1.0.rand, 1.0.rand, 0,
+    0,        0,        1.0.rand
+]);
+
+~network = ResonatorNetwork(objs,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix).calcModalData(gain:40.dbamp,maxFreq:16000,incl:"ynnn")
+)
+
+// Now let's compare two methods for simulating our system: the first one using SOS, the second one using SOSBank
+
+
+// method 1: SOS
+
+// not so elegant: make 6 dedicated synth defs for simulating each possible excitation/readout point combination
+3 do: { |i|
+	2 do: { |j|
+		~makeResonatorSynthDef.(
+			~network.modalData["biquadCoefs"]["a1"][i][j],
+			~network.modalData["biquadCoefs"]["a2"][i][j],
+			~network.modalData["biquadCoefs"]["b1"].neg,
+			~network.modalData["biquadCoefs"]["b2"].neg,
+			\string_ ++ i ++ \_ ++ j
+		);
+	}
+};
+
+x = Array.newClear(6);
+(
+s.makeBundle(nil,{
+	x[0] = Synth(\string_0_0,[\inBus,10,\outBus,0,\outputGain,5],1,\addToTail);
+	x[1] = Synth(\string_0_1,[\inBus,10,\outBus,1,\outputGain,5],1,\addToTail);
+	x[2] = Synth(\string_1_0,[\inBus,10,\outBus,2,\outputGain,5],1,\addToTail);
+	x[3] = Synth(\string_1_1,[\inBus,10,\outBus,3,\outputGain,5],1,\addToTail);
+	x[4] = Synth(\string_2_0,[\inBus,10,\outBus,4,\outputGain,5],1,\addToTail);
+	x[5] = Synth(\string_2_1,[\inBus,10,\outBus,5,\outputGain,5],1,\addToTail);
+    y = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
+})
+)
+
+x do: _.free; y.free
+
+// method 2: SOSBank
+
+// more elegant (although not very efficient for some reason... lookup overhead due to buffering the coefficients???): store all filter coefficients in buffers and use a single synth def
+(
+s.waitForBoot({
+	SynthDef(\string,{ arg bufnum_a1, bufnum_a2, bufnum_b1, bufnum_b2, inBus,outBus = 0,inputGain = 1,outputGain = 1,dryWet = 1;
+		var input,output;
+
+		input = In.ar(inBus)*inputGain;
+		output = SOSBank.ar(2,3,input,-1,bufnum_a1,bufnum_a2,bufnum_b1,bufnum_b2);
+
+		Out.ar(outBus,(1 - dryWet)*input + (dryWet*output))
+	}).add;
+
+	~a1 = Buffer.loadCollection(s,~network.modalData["biquadCoefs"]["a1"].flat);
+	~a2 = Buffer.loadCollection(s,~network.modalData["biquadCoefs"]["a2"].flat);
+	~b1 = Buffer.loadCollection(s,~network.modalData["biquadCoefs"]["b1"]);
+	~b2 = Buffer.loadCollection(s,~network.modalData["biquadCoefs"]["b2"])
+})
+)
+
+(
+s.makeBundle(nil,{
+	x = Synth(\string,[\inBus,10,\outBus,0,\outputGain,5,\bufnum_a1,~a1.bufnum,\bufnum_a2,~a2.bufnum,\bufnum_b1,~b1.bufnum,\bufnum_b2,~b2.bufnum],1,\addToTail);
+	y = Synth(\strike,[\outBus,10,\lpFreq,8000],1,\addToHead)
+})
+)
+
+x.free; y.free
+::
