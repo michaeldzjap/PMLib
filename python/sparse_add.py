@@ -234,10 +234,10 @@ def spdistr1D(ymax,x0,N,p='trunc',eps=1e-09):
     E[l0,0] = (1 - alpha0)*ymax; E[l0 + 1,0] = alpha0*ymax
   else:
     l0 = min(l0,N - 3)
-    E[l0-1,0] = -(1./6)*alpha0*(alpha0 - 1)*(alpha0 - 2)*ymax
-    E[l0,0] = 0.5*(alpha0 - 1)*(alpha0 + 1)*(alpha0 - 2)*ymax
-    E[l0+1,0] = -0.5*alpha0*(alpha0 + 1)*(alpha0 - 2)*ymax
-    E[l0+2,0] = (1./6)*alpha0*(alpha0 + 1)*(alpha0 - 1)*ymax
+    E[l0-1,0] = -(1./6)*alpha0*(alpha0 - 1.)*(alpha0 - 2.)*ymax
+    E[l0,0] = 0.5*(alpha0 - 1.)*(alpha0 + 1.)*(alpha0 - 2.)*ymax
+    E[l0+1,0] = -0.5*alpha0*(alpha0 + 1.)*(alpha0 - 2.)*ymax
+    E[l0+2,0] = (1./6)*alpha0*(alpha0 + 1.)*(alpha0 - 1.)*ymax
 
   return E.tocsc()
 
@@ -287,9 +287,9 @@ def spdistr2D(zmax,x0,y0,Nx,Ny,p='trunc',eps=1e-09,flatten=False):
   if p == 'trunc' or (alphax0 < eps and alphay0 < eps):
     E[l0,m0] = zmax
   else:
-    E[l0,m0] = (1 - alphax0)*(1 - alphay0)*zmax
-    E[l0,m0 + 1] = (1 - alphax0)*alphay0*zmax
-    E[l0 + 1,m0] = alphax0*(1 - alphay0)*zmax
+    E[l0,m0] = (1. - alphax0)*(1. - alphay0)*zmax
+    E[l0,m0 + 1] = (1. - alphax0)*alphay0*zmax
+    E[l0 + 1,m0] = alphax0*(1. - alphay0)*zmax
     E[l0 + 1,m0 + 1] = alphax0*alphay0*zmax
 
   # if true, flatten 2D matrix to 1D column vector by concatenating columns
