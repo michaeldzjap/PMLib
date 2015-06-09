@@ -10,6 +10,7 @@ import scipy as sp
 import numpy as np
 import warnings,os
 from numbers import Number
+import copy
 
 class ResonatorNetwork():
     SR = 44100
@@ -21,19 +22,19 @@ class ResonatorNetwork():
         else:
             self._objs = objs
         if connPointMatrix is None:
-            self._connPointMatrix = np.array([[0.5],[0.5]])
+            self._connPointMatrix = [[0.5],[0.5]]
         else:
             self._connPointMatrix = connPointMatrix
         if massMatrix is None:
-            self._massMatrix = np.array([[1.],[1.]])
+            self._massMatrix = [[1.],[1.]]
         else:
             self._massMatrix = massMatrix
         if excPointMatrix is None:
-            self._excPointMatrix = np.array([[0.5],[0.]])
+            self._excPointMatrix = [[0.5],[0.]]
         else:
             self._excPointMatrix = excPointMatrix
         if readoutPointMatrix is None:
-            self.readoutPointMatrix = np.array([0.4,0.])
+            self.readoutPointMatrix = [[0.4],[0.]]
         else:
             self.readoutPointMatrix = readoutPointMatrix
 
@@ -73,23 +74,19 @@ class ResonatorNetwork():
         except TypeError:
             raise TypeError('argument connPointMatrix must be a 2D indexable object')
         else:
-            if isinstance(newConnPointMatrix,list) or isinstance(newConnPointMatrix,tuple):
-                newConnPointMatrix = np.array(newConnPointMatrix)
             self.__checkRangeOfArray(newConnPointMatrix,'connPointMatrix')
             self.__checkNrOfElmsInColOfArray(newConnPointMatrix,'connPointMatrix')
-            self._connPointMatrix = np.asarray(newConnPointMatrix).copy()
+            self._connPointMatrix = copy.deepcopy(newConnPointMatrix)
 
     @massMatrix.setter
-    def massMatrix(self,newmassMatrix):
+    def massMatrix(self,newMassMatrix):
         try:
             len(massMatrix)
         except TypeError:
             raise TypeError('argument massMatrix must be a 2D indexable object')
         else:
-            if isinstance(newmassMatrix,list) or isinstance(newmassMatrix,tuple):
-                newmassMatrix = np.array(newmassMatrix)
-            self.__checkNrOfElmsInColOfArray(newmassMatrix,'massMatrix')
-            self._massMatrix = np.asarray(newmassMatrix).copy()
+            self.__checkNrOfElmsInColOfArray(newMassMatrix,'massMatrix')
+            self._massMatrix = copy.deepcopy(newMassMatrix)
 
     @excPointMatrix.setter
     def excPointMatrix(self,newExcPointMatrix):
@@ -98,11 +95,8 @@ class ResonatorNetwork():
         except TypeError:
             raise TypeError('argument excPointMatrix must be a 2D indexable object')
         else:
-            if isinstance(newExcPointMatrix,list) or isinstance(newExcPointMatrix,tuple):
-                newExcPointMatrix = np.array(newExcPointMatrix)
             self.__checkRangeOfArray(newExcPointMatrix,'excPointMatrix')
-            self.__checkNrOfElmsInColOfArray(newExcPointMatrix,'excPointMatrix')
-            self._excPointMatrix = np.asarray(newExcPointMatrix).copy()
+            self._excPointMatrix = copy.deepcopy(newExcPointMatrix)
 
     @readoutPointMatrix.setter
     def readoutPointMatrix(self,newReadoutPointMatrix):
@@ -111,10 +105,8 @@ class ResonatorNetwork():
         except TypeError:
             raise TypeError('argument readoutPointMatrix must be a 2D indexable object')
         else:
-            if isinstance(newReadoutPointMatrix,list) or isinstance(newReadoutPointMatrix,tuple):
-                newReadoutPointMatrix = np.array(newReadoutPointMatrix)
             self.__checkRangeOfArray(newReadoutPointMatrix,'readoutPointMatrix')
-            self._readoutPointMatrix = np.asarray(newReadoutPointMatrix).copy()
+            self._readoutPointMatrix = copy.deepcopy(newReadoutPointMatrix)
 
     # public methods
     def calcModes(self,minFreq=20.,maxFreq=SR/2,minT60=0.01):
@@ -196,7 +188,8 @@ class ResonatorNetwork():
                         raise Exception('argument ' + arg_name + ' may only contain elements between 0 - 1')
 
     def __checkNrOfElmsInColOfArray(self,mat,arg_name):
-        if np.any(np.sum(mat > 0,axis=0) > 2):
+        #if np.any(np.sum(mat > 0,axis=0) > 2):
+        if (any([sum([mat[p][q] > 0 for p in xrange(len(mat))]) for q in xrange(len(mat[0]))]) > 2):
             raise Exception('argument ' + arg_name + ' may only contain 2 nonzero elements per column')
 
     def __checkDimOfColls(self,coll1,coll2,err_str):
@@ -243,15 +236,15 @@ class ResonatorNetwork():
             colInds = np.nonzero(row)[0]
             # for every connection between obj q and r other objects, construct inter-connection matrices
             for j in colInds:
-                cpoint_q = self.connPointMatrix[i,j]
+                cpoint_q = self.connPointMatrix[i][j]
                 e_q = spdistr2D(1.,cpoint_q[0],cpoint_q[1],obj.Nx - 1,obj.Ny - 1,flatten=True)\
                 if isinstance(obj,Resonator2D) else spdistr1D(1.,cpoint_q,obj.Nm,'lin')
                 # return the row indices of the nonzero entrees in the current col we are looking in
-                row_r = np.nonzero(self.massMatrix[:,j].copy())[0].tolist()
+                row_r = [ind for ind,item in enumerate([self.massMatrix[q][j] for q in xrange(len(self.massMatrix))]) if item > 0]
                 # remove row index of current object and since list must now be of size 1, simply return row index
                 row_r.remove(i); row_r = row_r[0]
-                M = float(self.massMatrix[i,j])/self.massMatrix[row_r,j]    # mass ratio: Mq/Mr
-                cpoint_r = self.connPointMatrix[row_r,j]
+                M = float(self.massMatrix[i][j])/self.massMatrix[row_r][j]    # mass ratio: Mq/Mr
+                cpoint_r = self.connPointMatrix[row_r][j]
                 e_r = spdistr2D(1.,cpoint_r[0],cpoint_r[1],self.objs[row_r].Nx - 1,self.objs[row_r].Ny - 1,flatten=True) \
                 if isinstance(self.objs[row_r],Resonator2D) \
                 else spdistr1D(1.,cpoint_r,self.objs[row_r].B.shape[0],'lin')
@@ -296,7 +289,7 @@ class ResonatorNetwork():
     def __constrInputMatrix(self):
         B = None; k = self.__class__.k
         for row,obj in zip(self.excPointMatrix,self.objs):
-            E = lil_matrix((obj.Nm*2,self.excPointMatrix.shape[1]))
+            E = lil_matrix((obj.Nm*2,len(self.excPointMatrix[0])))
             for ep,i in zip(row,xrange(0,len(row))):
                 if ep > 0.0:
                     E[:obj.Nm,i] = spdistr2D(k**2/((1. + obj.b1*k)*obj.h**2),ep[0],ep[1],obj.Nx - 1,obj.Ny - 1,flatten=True)\
@@ -307,7 +300,7 @@ class ResonatorNetwork():
 
     def __constrOutputMatrix(self):
         S = None; k = self.__class__.k
-        for col in self.readoutPointMatrix.T:
+        for col in [list(x) for x in zip(*self.readoutPointMatrix)]:    # transpose self.readoutPointMatrix
             E = None
             for rp,obj in zip(col,self.objs):
                 if rp > 0.0:
