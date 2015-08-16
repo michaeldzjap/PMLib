@@ -63,6 +63,9 @@ Modes which fall below CODE::minFreq:: will be discarded.
 ARGUMENT:: maxFreq
 Modes which are higher than CODE::maxFreq:: will be discarded.
 
+ARGUMENT:: minT60
+Modes with a duration below CODE::minT60:: will be discarded.
+
 ARGUMENT:: gain
 An optional multiplicative factor to be applied to the numerator coefficients of the second order biquad sections. This may be used to boost the response of the filter by a specified amount of dB's. if one is unsure about how to use this parameter, it is adviced to leave it as it is. If it turns out the response of the resonator is very low in amplitude, one can always increase the gain of the second order section ugens during the simulation (this will have exactly the same effect, although will be slightly less efficient).
 

@@ -13,7 +13,7 @@ with open(os.path.dirname(os.path.realpath(__file__)) + '/networkArgs.json') as 
             resonators.append(Resonator2D(r['gamma'],r['kappa'],r['b1'],r['b2'],r['bc'],r['epsilon']))
     network = ResonatorNetwork(resonators,args['connPointMatrix'],args['massMatrix'],\
     args['excPointMatrix'],args['readoutPointMatrix'])
-    network.calcModes(args['minFreq'],args['maxFreq']);
+    network.calcModes(args['minFreq'],args['maxFreq'],args['minT60']);
     if args['incl'][0] == 'y':
         network.calcBiquadCoefs(args['gain'])
     json_data.close()

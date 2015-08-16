@@ -14,7 +14,7 @@ ResonatorNetwork {
 	}
 
 	init { arg resonators,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix;
-		this.resonators = resonators ? [FDStringDesc.new,FDStringDesc.new(101)];
+		this.resonators = resonators ? [Resonator1D.new,Resonator1D.new(101)];
 		this.connPointMatrix = connPointMatrix ? Array2D.fromArray(2,1,[0.5,0.5]);
 		this.massMatrix = massMatrix ? Array2D.fromArray(2,1,[1,1]);
 		this.excPointMatrix = excPointMatrix ? Array2D.fromArray(2,1,[0.25,0]);
@@ -92,10 +92,10 @@ ResonatorNetwork {
 		}
 	}
 
-	calcModalData { arg minFreq=25,maxFreq=(Server.default.sampleRate ? 44100).div(2),gain=1,pathname=pythonScriptPath ++ "/modalData.json",incl="ynnn",async=false;
+	calcModalData { arg minFreq=25,maxFreq=(Server.default.sampleRate ? 44100).div(2),minT60=0.01,gain=1,pathname=pythonScriptPath ++ "/modalData.json",incl="ynnn",async=false;
 		var cmdSeq;
 		this.prCheckMatrixDimensions;
-		this.prParseArgsAsJSON(minFreq,maxFreq,gain,pathname,incl);
+		this.prParseArgsAsJSON(minFreq,maxFreq,minT60,gain,pathname,incl);
 		cmdSeq = "export PATH=" ++ pythonPath.shellQuote ++ ":$PATH && cd" + pythonScriptPath.shellQuote + "&& python systemSetup.py && rm -rf networkArgs.json";
 		async.if { cmdSeq.unixCmd } { cmdSeq.systemCmd };
 		this.prParseModalData(pathname)
@@ -132,7 +132,7 @@ ResonatorNetwork {
 		}
 	}
 
-	prParseArgsAsJSON { arg minFreq,maxFreq,gain,pathname,incl;
+	prParseArgsAsJSON { arg minFreq,maxFreq,minT60,gain,pathname,incl;
 		var matrixToString = { |mtr|
 			var str = "[";
 			mtr.isKindOf(Array2D).if {
@@ -144,7 +144,7 @@ ResonatorNetwork {
 		};
 
 		File.use(pythonScriptPath ++ "/networkArgs.json","w",{ |f|
-			var json = "{ \"minFreq\":" ++ minFreq ++ ",\"maxFreq\":" ++ maxFreq ++ ",\"gain\":" ++ gain ++ ",\"incl\":" ++ "\"" ++ incl ++ "\"" ++ ",\"path\":" ++ "\"" ++ pathname ++ "\"" ++ ",\"resonators\":" ++ "[";
+			var json = "{ \"minFreq\":" ++ minFreq ++ ",\"maxFreq\":" ++ maxFreq ++ ",\"minT60\":" ++ minT60 ++ ",\"gain\":" ++ gain ++ ",\"incl\":" ++ "\"" ++ incl ++ "\"" ++ ",\"path\":" ++ "\"" ++ pathname ++ "\"" ++ ",\"resonators\":" ++ "[";
 			resonators do: { |obj,i|
 				json = json ++ obj.jsonString ++ (i == resonators.lastIndex).if { "]," } { "," }
 			};
