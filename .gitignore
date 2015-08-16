@@ -6,3 +6,5 @@
 /python/tests
 # ignore any json in /python
 /python/*.json
+# ignore all DS_Store files
+*.DS_Store
