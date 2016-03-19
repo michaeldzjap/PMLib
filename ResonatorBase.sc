@@ -9,7 +9,7 @@ ResonatorBase {
 	}
 
 	*new { arg gamma=200,kappa=1,b1=0,b2=0,boundaryCond=\bothSimplySupported;
-		(super == FDObjectBase).if {
+		(super == ResonatorBase).if {
 			Error("an instance of % is not supposed to be created directly by the user".format(this)).throw
 		} {
 			^super.newCopyArgs(gamma,kappa,b1,b2,boundaryCond).init(gamma,kappa,b1,b2,boundaryCond)
