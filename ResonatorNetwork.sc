@@ -5,7 +5,7 @@ ResonatorNetwork {
 	*initClass {
 		Class.initClassTree(String);
 		pythonScriptPath = this.class.filenameSymbol.asString.dirname ++ "/python";
-		pythonPath = "/Library/Frameworks/Python.framework/Versions/Current/bin"
+		pythonPath = "/System/Library/Frameworks/Python.framework/Versions/Current/bin/python"
 	}
 
 	*new { arg resonators,connPointMatrix,massMatrix,excPointMatrix,readoutPointMatrix;
@@ -96,7 +96,7 @@ ResonatorNetwork {
 		var cmdSeq;
 		this.prCheckMatrixDimensions;
 		this.prParseArgsAsJSON(minFreq,maxFreq,minT60,gain,pathname,incl);
-		cmdSeq = "export PATH=" ++ pythonPath.shellQuote ++ ":$PATH && cd" + pythonScriptPath.shellQuote + "&& python systemSetup.py && rm -rf networkArgs.json";
+		cmdSeq = "cd" + pythonScriptPath.shellQuote + "&&" + pythonPath.shellQuote + "systemSetup.py && rm -rf networkArgs.json";
 		async.if { cmdSeq.unixCmd } { cmdSeq.systemCmd };
 		this.prParseModalData(pathname)
 	}
@@ -158,6 +158,9 @@ ResonatorNetwork {
 
 	prParseModalData { arg pathname;
 		File.use(pathname,"r",{ |f|
+			File.exists(pathname).not.if {
+				Error("The file % does not exist. Hence, it is likely that no modal data has been calculated.".format(pathname)).throw
+			};
 			modalData = pathname.parseYAMLFile.dataAsStringToFloat;
 		})
 	}

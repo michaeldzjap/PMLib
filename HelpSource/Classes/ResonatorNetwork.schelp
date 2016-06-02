@@ -6,7 +6,7 @@ RELATED:: Classes/Resonator1D, Classes/Resonator2D
 DESCRIPTION::
 CODE::ResonatorNetwork:: allows one to assemble a system of inter-connected resonators in the form of strings, bars, membranes and plates. Once a network has been specified, its modal data can be calculated, which in turn may be used to simulate the resonator network in real time. Note that the calculation of all modal data is an offline procedure and is done behind the scenes in the Python programming language with the help of the NumPy and SciPy packages. This calculation stage may take a significant amount of time, dependending on the complexity of the resonator network.
 
-WARNING::This class has only been tested to work on OSX. Although it may work prefectly well on other platforms provided that a suitable version of Python 2.7.x and the packages NumPy and SciPy have been installed, no guarantees are given. The default Python path is set as SOFT::"/Library/Frameworks/Python.framework/Versions/Current/bin".:: This might have to be set to a different location if CODE::ResonatorNetwork:: is unable to calculate any modal data despite having set up Python, NumPy and SciPy correctly.
+WARNING::This class has only been tested to work on OSX. Although it may work prefectly well on other platforms provided that a suitable version of Python 2.7.x and the packages NumPy and SciPy have been installed, no guarantees are given. The default full path to the Python executable is set as SOFT::"/System/Library/Frameworks/Python.framework/Versions/Current/bin/python"::. This is tailored to the OSX platform and hence, would need to be adapted in case one would like to use a Python executable living at another location or if you are on a different platform. Note that if a full path to a python executable is not properly specified, CODE::ResonatorNetwork:: will be unable to calculate any modal data and hence, an error will be thrown.
 ::
 
 CLASSMETHODS::
@@ -32,10 +32,10 @@ An LINK::Classes/Array2D:: containing CODE::m:: rows and CODE::n:: columns, wher
 returns:: An instance of CODE::ResonatorNetwork:: with the given objects, mass matrix, matrices describing the positions of object inter-connection and matrices for the excitation and readout points of the resulting system as instance variables.
 
 METHOD:: pythonPath
-Class variable which points to a valid version of Python 2.7.x. Set this to a different path if necessary (see below).
+Class variable which points to a valid executable version of Python 2.7.x. Set this to a different path if necessary (see below).
 
 ARGUMENT:: value
-A LINK::Classes/String:: denoting the location of Python. It is essential to point this to the right location of a valid Python version, otherwise the instance method CODE::calcModes:: will fail to compute any modal data. The default path is set to the location of the currently used Python version, which on OSX 10.9.4 is equal to SOFT::"/Library/Frameworks/Python.framework/Versions/Current/bin"::.
+A LINK::Classes/String:: denoting the location of a Python executable. It is essential to point this to a valid executable path, otherwise the instance method CODE::calcModes:: will fail to compute any modal data. The default path is set to the location of the default currently used Python version by the OSX operating system, which for version 10.11.5 is equal to SOFT::"/System/Library/Frameworks/Python.framework/Versions/Current/bin/python"::.
 
 returns:: A LINK::Classes/String:: which points to the path denoting the current location of Python.
 
@@ -70,7 +70,7 @@ ARGUMENT:: gain
 An optional multiplicative factor to be applied to the numerator coefficients of the second order biquad sections. This may be used to boost the response of the filter by a specified amount of dB's. if one is unsure about how to use this parameter, it is adviced to leave it as it is. If it turns out the response of the resonator is very low in amplitude, one can always increase the gain of the second order section ugens during the simulation (this will have exactly the same effect, although will be slightly less efficient).
 
 ARGUMENT:: pathname
-A LINK::Classes/String:: denoting a valid path where the json representation of the calculated modal data will be saved.
+A LINK::Classes/String:: denoting a valid path (must include the file name and json extension) where the json representation of the calculated modal data will be saved.
 
 ARGUMENT:: incl
 A four parameter LINK::Classes/String:: indicating which representations of the modal data should be saved to disk in json format. Every parameter can take on one of two values: CODE::"y":: or CODE::"n"::, signifying "yes" or "no" respectively. The first slot corresponds to the transfer function matrix (i.e. a dictionary of second order filter section coefficients), the second slot corresponds to the eigenvalues in rectangular coordinates, the third slot corresponds to the eigenvalues in polar coordinates, and the fourth and final slot corresponds to the eigenvectors.
