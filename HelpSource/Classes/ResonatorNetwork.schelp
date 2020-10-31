@@ -35,7 +35,7 @@ METHOD:: pythonPath
 Class variable which points to a valid executable version of Python 2.7.x. Set this to a different path if necessary (see below).
 
 ARGUMENT:: value
-A LINK::Classes/String:: denoting the location of a Python executable. It is essential to point this to a valid executable path, otherwise the instance method CODE::calcModes:: will fail to compute any modal data. The default path is set to the location of the default currently used Python version by the OSX operating system, which for version 10.11.5 is equal to SOFT::"/System/Library/Frameworks/Python.framework/Versions/Current/bin/python"::.
+A LINK::Classes/String:: denoting the location of a Python executable. It is essential to point this to a valid executable path, otherwise the instance method CODE::calc_modes:: will fail to compute any modal data. The default path is set to the location of the default currently used Python version by the OSX operating system, which for version 10.11.5 is equal to SOFT::"/System/Library/Frameworks/Python.framework/Versions/Current/bin/python"::.
 
 returns:: A LINK::Classes/String:: which points to the path denoting the current location of Python.
 
@@ -118,8 +118,8 @@ var objs,massMatrix,connPointMatrix,excPointMatrix,readoutPointMatrix;
 
 // the virtual object descriptions making up our system
 objs = [
-	Resonator1D(100,0.3,0.698698,0.001515,\leftClampedRightFree),
-	Resonator1D(200,0.1,0.698698,0.001515,\leftClampedRightFree)
+	Resonator1D(100,0.3,0.698698,0.001515,'CF'),
+	Resonator1D(200,0.1,0.698698,0.001515,'CF')
 ];
 
 // note that the mass ratio is 1, meaning that an equal amount of energy will flow from string 1 to string 2
@@ -393,9 +393,9 @@ var objs,massMatrix,connPointMatrix,excPointMatrix,readoutPointMatrix;
 
 // the virtual object descriptions making up our system
 objs = [
-	Resonator2D(0,20,0.61,0.0015,\allSidesClamped,1),
-	Resonator1D(100,0.3,0.698698,0.001515,\bothClamped),
-	Resonator2D(0,50,0.61,0.0015,\allSidesClamped,1),
+	Resonator2D(0,20,0.61,0.0015,'CCCC',1),
+	Resonator1D(100,0.3,0.698698,0.001515,'CC'),
+	Resonator2D(0,50,0.61,0.0015,'CCCC',1),
 ];
 
 // note that the mass ratio of the string to both plates is set as 2, meaning that this should increase the
@@ -494,8 +494,8 @@ CODE::
 var objs,massMatrix,connPointMatrix,excPointMatrix,readoutPointMatrix;
 
 objs = [
-    Resonator1D(100,0.3,0.698698,0.001515,\bothClamped),
-    Resonator1D(200,0.1,0.698698,0.001515,\bothClamped)
+    Resonator1D(100,0.3,0.698698,0.001515,'CC'),
+    Resonator1D(200,0.1,0.698698,0.001515,'CC')
 ];
 
 massMatrix = Array2D.fromArray(2,1,[

@@ -4,10 +4,19 @@ Resonator2D : ResonatorBase {
 
 	*initClass {
 		Class.initClassTree(Array); Class.initClassTree(Symbol);
-		validBoundaryConds = #[\allSidesClamped,\leftClampedRightClampedTopClampedBottom,\leftClampedRightClampedTopClampedBottom,\leftClampedRightClampedTopSimplySupportedBottom,\leftClampedRightClampedTopSimplySupportedBottom,\leftClampedRightClampedTopSimplySupportedBottom,\leftClampedRightClampedTopFreeBottom,\leftClampedRightClampedTopFreeBottom,\leftClampedRightClampedTopFreeBottom,\leftClampedRightSimplySupportedTopClampedBottom,\leftClampedRightSimplySupportedTopClampedBottom,\leftClampedRightSimplySupportedTopClampedBottom,\leftClampedRightSimplySupportedTopSimplySupportedBottom,\leftClampedRightSimplySupportedTopSimplySupportedBottom,\leftClampedRightSimplySupportedTopSimplySupportedBottom,\leftClampedRightSimplySupportedTopFreeBottom,\leftClampedRightSimplySupportedTopFreeBottom,\leftClampedRightSimplySupportedTopFreeBottom,\leftClampedRightFreeTopClampedBottom,\leftClampedRightFreeTopClampedBottom,\leftClampedRightFreeTopClampedBottom,\leftClampedRightFreeTopSimplySupportedBottom,\leftClampedRightFreeTopSimplySupportedBottom,\leftClampedRightFreeTopSimplySupportedBottom,\leftClampedRightFreeTopFreeBottom,\leftClampedRightFreeTopFreeBottom,\leftClampedRightFreeTopFreeBottom,\leftSimplySupportedRightClampedTopClampedBottom,\leftSimplySupportedRightClampedTopClampedBottom,\leftSimplySupportedRightClampedTopClampedBottom,\leftSimplySupportedRightClampedTopSimplySupportedBottom,\leftSimplySupportedRightClampedTopSimplySupportedBottom,\leftSimplySupportedRightClampedTopSimplySupportedBottom,\leftSimplySupportedRightClampedTopFreeBottom,\leftSimplySupportedRightClampedTopFreeBottom,\leftSimplySupportedRightClampedTopFreeBottom,\leftSimplySupportedRightSimplySupportedTopClampedBottom,\leftSimplySupportedRightSimplySupportedTopClampedBottom,\leftSimplySupportedRightSimplySupportedTopClampedBottom,\leftSimplySupportedRightSimplySupportedTopSimplySupportedBottom,\allSidesSimplySupported,\leftSimplySupportedRightSimplySupportedTopSimplySupportedBottom,\leftSimplySupportedRightSimplySupportedTopFreeBottom,\leftSimplySupportedRightSimplySupportedTopFreeBottom,\leftSimplySupportedRightSimplySupportedTopFreeBottom,\leftSimplySupportedRightFreeTopClampedBottom,\leftSimplySupportedRightFreeTopClampedBottom,\leftSimplySupportedRightFreeTopClampedBottom,\leftSimplySupportedRightFreeTopSimplySupportedBottom,\leftSimplySupportedRightFreeTopSimplySupportedBottom,\leftSimplySupportedRightFreeTopSimplySupportedBottom,\leftSimplySupportedRightFreeTopFreeBottom,\leftSimplySupportedRightFreeTopFreeBottom,\leftSimplySupportedRightFreeTopFreeBottom,\leftFreeRightClampedTopClampedBottom,\leftFreeRightClampedTopClampedBottom,\leftFreeRightClampedTopClampedBottom,\leftFreeRightClampedTopSimplySupportedBottom,\leftFreeRightClampedTopSimplySupportedBottom,\leftFreeRightClampedTopSimplySupportedBottom,\leftFreeRightClampedTopFreeBottom,\leftFreeRightClampedTopFreeBottom,\leftFreeRightClampedTopFreeBottom,\leftFreeRightSimplySupportedTopClampedBottom,\leftFreeRightSimplySupportedTopClampedBottom,\leftFreeRightSimplySupportedTopClampedBottom,\leftFreeRightSimplySupportedTopSimplySupportedBottom,\leftFreeRightSimplySupportedTopSimplySupportedBottom,\leftFreeRightSimplySupportedTopSimplySupportedBottom,\leftFreeRightSimplySupportedTopFreeBottom,\leftFreeRightSimplySupportedTopFreeBottom,\leftFreeRightSimplySupportedTopFreeBottom,\leftFreeRightFreeTopClampedBottom,\leftFreeRightFreeTopClampedBottom,\leftFreeRightFreeTopClampedBottom,\leftFreeRightFreeTopSimplySupportedBottom,\leftFreeRightFreeTopSimplySupportedBottom,\leftFreeRightFreeTopSimplySupportedBottom,\leftFreeRightFreeTopFreeBottom,\leftFreeRightFreeTopFreeBottom,\allSidesFree]
+		validBoundaryConds = #[
+			'CCCC', 'CCCS', 'CCCF', 'CCSC', 'CCSS', 'CCSF', 'CCFC', 'CCFS', 'CCFF',
+			'CSCC', 'CSCS', 'CSCF', 'CSSC', 'CSSS', 'CSSF', 'CSFC', 'CSFS', 'CSFF',
+			'CFCC', 'CFCS', 'CFCF', 'CFSC', 'CFSS', 'CFSF', 'CFFC', 'CFFS', 'CFFF',
+			'SCCC', 'SCCS', 'SCCF', 'SCSC', 'SCSS', 'SCSF', 'SCFC', 'SCFS', 'SCFF',
+			'SSCC', 'SSCS', 'SSCF', 'SSSC', 'SSSS', 'SSSF', 'SSFC', 'SSFS', 'SSFF',
+			'SFCC', 'SFCS', 'SFCF', 'SFSC', 'SFSS', 'SFSF', 'SFFC', 'SFFS', 'SFFF',
+			'FCCC', 'FCCS', 'FCCF', 'FCSC', 'FCSS', 'FCSF', 'FCFC', 'FCFS', 'FCFF',
+			'FSCC', 'FSCS', 'FSCF', 'FSSC', 'FSSS', 'FSSF', 'FSFC', 'FSFS', 'FSFF',
+			'FFCC', 'FFCS', 'FFCF', 'FFSC', 'FFSS', 'FFSF', 'FFFC', 'FFFS', 'FFFF'];
 	}
 
-	*new { arg gamma=200,kappa=1,b1=0,b2=0,boundaryCond=\allSidesSimplySupported,epsilon=1;
+	*new { arg gamma=200,kappa=1,b1=0,b2=0,boundaryCond='SSSS',epsilon=1;
 		^super.newCopyArgs(gamma,kappa,b1,b2,boundaryCond,epsilon).init(epsilon)
 	}
 
@@ -33,7 +42,7 @@ Resonator2D : ResonatorBase {
 
 	jsonString {
 		var bcStr = boundaryCond.asString;
-		bcStr[0] = bcStr[0].toUpper;
+		bcStr = bcStr.toUpper;
 		^"{ \"dim\":" ++ 2 ++ ",\"gamma\":" ++ gamma ++ ",\"kappa\":" ++ kappa ++ ",\"b1\":" ++ b1 ++ ",\"b2\":" ++ b2 ++ ",\"bc\":" ++ "\"" ++ bcStr ++ "\",\"epsilon\":" ++ epsilon ++ " }"
 	}
 }

@@ -8,7 +8,7 @@ ResonatorBase {
 		timeStep = sampleRate.reciprocal;
 	}
 
-	*new { arg gamma=200,kappa=1,b1=0,b2=0,boundaryCond=\bothSimplySupported;
+	*new { arg gamma=200,kappa=1,b1=0,b2=0,boundaryCond='SS';
 		(super == ResonatorBase).if {
 			Error("an instance of % is not supposed to be created directly by the user".format(this)).throw
 		} {

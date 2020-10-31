@@ -50,7 +50,7 @@ EXAMPLES::
 CODE::
 // create a new instance of Resonator1D with given physical parameters and print the corresponding json representation
 (
-var resonatorDesc = Resonator1D(200,1,0.698698,0.001515,\bothClamped);
+var resonatorDesc = Resonator1D(200,1,0.698698,0.001515,'CC');
 resonatorDesc.jsonString
 )
 ::

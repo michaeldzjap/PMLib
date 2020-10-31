@@ -54,7 +54,7 @@ EXAMPLES::
 CODE::
 // create a new instance of Resonator2D with given physical parameters and print the corresponding json representation
 (
-var resonatorDesc = Resonator2D(200,50,0.698698,0.001515,\allSidesClamped);
+var resonatorDesc = Resonator2D(200,50,0.698698,0.001515,'CCCC');
 resonatorDesc.jsonString
 )
 ::
