@@ -13,8 +13,6 @@ class Resonator1D(ResonatorBase):
 
     def __init__(self, gamma=200, kappa=1, b1=0, b2=0, boundary='SS'):
         super().__init__(gamma, kappa, b1, b2, boundary)
-        # self.h = None
-        # self.N = None
 
     def constr_update_matrices(self):
         self._calc_grid_step()

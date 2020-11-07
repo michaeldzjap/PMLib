@@ -15,10 +15,6 @@ class Resonator2D(ResonatorBase):
                  boundary='SSSS', epsilon=1):
         super().__init__(gamma, kappa, b1, b2, boundary)
         self._epsilon = epsilon
-        # self.h = None
-        # self.Ny = None
-        # self.Nx = None
-        # self.Nm = None
 
     @property
     def epsilon(self):
