@@ -1,7 +1,7 @@
 
 from math import sqrt
 
-from scipy.sparse import dia_matrix,identity
+from scipy.sparse import identity
 
 from .ResonatorBase import ResonatorBase
 from .sparse_diff_matr_2d import (
