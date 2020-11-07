@@ -10,7 +10,6 @@ from scipy.sparse import lil_matrix, identity, hstack, vstack, csc_matrix
 from scipy.linalg import solve
 from scipy.linalg import eig
 
-import scipy as sp
 import numpy as np
 
 from .ResonatorBase import ResonatorBase
