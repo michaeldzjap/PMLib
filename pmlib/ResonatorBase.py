@@ -1,4 +1,3 @@
-
 class ResonatorBase():
     SR = 44100
     k = 1 / SR
