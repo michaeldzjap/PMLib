@@ -1,7 +1,6 @@
 
 from math import sqrt
 
-import numpy as np
 from scipy.sparse import dia_matrix,identity
 
 from .ResonatorBase import ResonatorBase
