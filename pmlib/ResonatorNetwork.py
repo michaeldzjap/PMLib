@@ -1,7 +1,6 @@
 
 from math import pi
 from numbers import Number
-import warnings
 import os
 import json
 import sys
