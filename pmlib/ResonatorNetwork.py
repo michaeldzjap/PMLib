@@ -18,11 +18,10 @@ from .sparse_add import spdistr1D, spdistr2D
 
 
 class ResonatorNetwork():
-    SR = 44100
-    k = 1. / SR
-
     def __init__(self, objs=None, connPointMatrix=None, massMatrix=None,
-                 excPointMatrix=None, readoutPointMatrix=None):
+                 excPointMatrix=None, readoutPointMatrix=None, sr=44100):
+        self.sr = sr
+        self.k = 1 / sr
         self.objs = objs or [Resonator1D(), Resonator1D(101)]
         self.connPointMatrix = connPointMatrix or [[0.5], [0.5]]
         self.massMatrix = massMatrix or [[1.], [1.]]
@@ -95,7 +94,7 @@ class ResonatorNetwork():
             self._check_array_range(value, 'readoutPointMatrix')
             self._readoutPointMatrix = value
 
-    def calc_modes(self, min_freq=20., max_freq=SR/2, min_T60=0.01):
+    def calc_modes(self, min_freq, max_freq, min_T60=0.01):
         self._check_dimensions()
         for m in self.objs:
             m.constr_update_matrices()
@@ -110,9 +109,9 @@ class ResonatorNetwork():
         self._S = self._constr_output_matrix() * v
 
         # filter modes
-        wmax = 2. * pi * max_freq / type(self).SR
-        wmin = 2. * pi * min_freq / type(self).SR
-        rmin = 1. - 6.91 / (min_T60 * type(self).SR)
+        wmax = 2. * pi * max_freq / self.sr
+        wmin = 2. * pi * min_freq / self.sr
+        rmin = 1. - 6.91 / (min_T60 * self.sr)
         lambda_arg = np.arccos(_lambda.real / lambda_abs)
         idx = (
             (_lambda.imag >= 0.) & (lambda_abs < 1.) & (lambda_arg >= wmin) &
@@ -248,7 +247,7 @@ class ResonatorNetwork():
     #         raise Exception(arg_name + ' contains one or more invalid coordinates for a plate object')
 
     def _constr_state_transition_matrix(self):
-        k = type(self).k
+        k = self.k
         A = None  # state transtion block matrix
 
         # Loop over all rows (i.e. individual objs) and
@@ -366,7 +365,7 @@ class ResonatorNetwork():
 
     def _constr_input_matrix(self):
         B = None
-        k = type(self).k
+        k = self.k
 
         for row, obj in zip(self.excPointMatrix, self.objs):
             E = lil_matrix((obj.Nm * 2, len(self.excPointMatrix[0])))
@@ -388,7 +387,7 @@ class ResonatorNetwork():
 
     def _constr_output_matrix(self):
         S = None
-        k = type(self).k
+        k = self.k
 
         for col in [list(x) for x in zip(*self.readoutPointMatrix)]:  # transpose self.readoutPointMatrix
             E = None

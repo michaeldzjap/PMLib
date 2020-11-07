@@ -11,13 +11,13 @@ from .sparse_diff_matr_1d import (
 class Resonator1D(ResonatorBase):
     valid_boundaries = BOUNDARY_CONDITIONS_1D
 
-    def __init__(self, gamma=200, kappa=1, b1=0, b2=0, boundary='SS'):
-        super().__init__(gamma, kappa, b1, b2, boundary)
+    def __init__(self, gamma=200, kappa=1, b1=0, b2=0, boundary='SS', sr=44100):
+        super().__init__(gamma, kappa, b1, b2, boundary, sr)
 
     def constr_update_matrices(self):
         self._calc_grid_step()
 
-        k = type(self).k
+        k = self.k
         _lambda2 = (self.gamma * k / self.h) ** 2
         mu2 = (self.kappa * k / self.h ** 2) ** 2
         zeta = 2. * self.b2 * k / self.h ** 2
@@ -42,7 +42,7 @@ class Resonator1D(ResonatorBase):
                 -((1. - self.b1 * k) * I + zeta * Dxx - mu2 * Dxxxx[1]) / den)
 
     def constr_coupling_matrices(self):
-        k = type(self).k
+        k = self.k
         h = self.h
         N = self.N
         a = 2. * self.b2 * k / h ** 2
@@ -66,7 +66,7 @@ class Resonator1D(ResonatorBase):
             self.C2 = -zeta * Dxx - mu2 * Dxxxx[1]
 
     def _calc_grid_step(self):
-        k = type(self).k
+        k = self.k
         a = self.gamma ** 2 * k ** 2 + 4. * self.b2 * k
         self.h = sqrt(0.5 * (a + sqrt(a ** 2 + 16. * self.kappa ** 2 * k ** 2)))
         self.N = int(1. / self.h)

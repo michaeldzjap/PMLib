@@ -16,24 +16,16 @@ parser.add_argument(
     'input', type=str,
     help='JSON file with network arguments')
 parser.add_argument(
-    'output', nargs='*', type=str, default='modal_data.json',
+    'output', nargs='*', type=str, default=['modal_data.json'],
     help='resulting JSON file with modal data')
 
 args = parser.parse_args()
 
 
-# Init library.
-global_sr = args.sample_rate
-global_k = 1 / global_sr
-ResonatorBase.SR = global_sr
-ResonatorBase.k = global_k
-ResonatorNetwork.SR = global_sr
-ResonatorNetwork.k = global_k
-
-
 # Main.
+SR = args.sample_rate
 network_file = args.input  # Was 'networkArgs.json'
-output_file = args.output  # Was 'modalData.json'
+output_file = args.output[0]  # Was 'modalData.json'
 
 with open(network_file) as jsonfile:
     args = json.load(jsonfile)
@@ -43,16 +35,16 @@ with open(network_file) as jsonfile:
         if r['dim'] == 1:
             resonators.append(Resonator1D(
                 r['gamma'], r['kappa'],
-                r['b1'], r['b2'], r['bc']))
+                r['b1'], r['b2'], r['bc'], SR))
         else:
             resonators.append(Resonator2D(
                 r['gamma'], r['kappa'],
                 r['b1'], r['b2'], r['bc'],
-                r['epsilon']))
+                r['epsilon'], SR))
     network = ResonatorNetwork(
         resonators,
         args['connPointMatrix'], args['massMatrix'],
-        args['excPointMatrix'], args['readoutPointMatrix'])
+        args['excPointMatrix'], args['readoutPointMatrix'], SR)
 
     network.calc_modes(args['minFreq'], args['maxFreq'], args['minT60'])
     if args['incl'][0] == 'y':

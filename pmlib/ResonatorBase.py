@@ -1,8 +1,7 @@
 class ResonatorBase():
-    SR = 44100
-    k = 1 / SR
-
-    def __init__(self, gamma=200, kappa=1, b1=0, b2=0, boundary=None):
+    def __init__(self, gamma=200, kappa=1, b1=0, b2=0, boundary=None, sr=44100):
+        self.sr = sr
+        self.k = 1 / sr
         self.gamma = gamma
         self.kappa = kappa
         self.b1 = b1
@@ -16,7 +15,7 @@ class ResonatorBase():
 
     @gamma.setter
     def gamma(self, value):
-        sr2 = self.SR / 2
+        sr2 = self.sr / 2
         if 0 <= value <= sr2:
             self._gamma = value
         else:

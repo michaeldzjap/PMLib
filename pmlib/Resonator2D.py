@@ -12,8 +12,8 @@ class Resonator2D(ResonatorBase):
     valid_boundaries = BOUNDARY_CONDITIONS_2D
 
     def __init__(self, gamma=200, kappa=1, b1=0, b2=0,
-                 boundary='SSSS', epsilon=1):
-        super().__init__(gamma, kappa, b1, b2, boundary)
+                 boundary='SSSS', epsilon=1, sr=44100):
+        super().__init__(gamma, kappa, b1, b2, boundary, sr)
         self._epsilon = epsilon
 
     @property
@@ -31,7 +31,7 @@ class Resonator2D(ResonatorBase):
     def constr_update_matrices(self):
         self._calc_grid_step()
 
-        k = type(self).k
+        k = self.k
         _lambda = self.gamma * k / self.h
         mu = self.kappa * k / self.h ** 2
 
@@ -51,7 +51,7 @@ class Resonator2D(ResonatorBase):
         self.C = -((1. - self.b1 * k) * I + zeta * Dlapl) / den
 
     def constr_coupling_matrices(self):
-        k = type(self).k
+        k = self.k
         h = self.h
         a = 2. * self.b2 * k / (h ** 2)
         Nx = self.Nx
@@ -64,7 +64,7 @@ class Resonator2D(ResonatorBase):
         self.C2 = -a * Dlapl
 
     def _calc_grid_step(self):
-        k = type(self).k
+        k = self.k
         a = self.gamma ** 2 * k ** 2 + 4. * self.b2 * k
         self.h = sqrt(a + sqrt(a ** 2 + 16. * self.kappa ** 2 * k ** 2))
         self.Nx = int(sqrt(self.epsilon) / self.h)
