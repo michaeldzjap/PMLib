@@ -1,4 +1,3 @@
-
 from math import floor, sqrt
 from warnings import warn
 
