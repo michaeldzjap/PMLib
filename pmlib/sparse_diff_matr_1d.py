@@ -1,4 +1,3 @@
-
 from itertools import product
 
 from scipy.sparse import dia_matrix
