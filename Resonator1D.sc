@@ -3,7 +3,7 @@ Resonator1D : ResonatorBase {
 
 	*initClass {
 		Class.initClassTree(Array);
-		validBoundaryConds = #[\bothClamped,\leftClampedRightSimplySupported,\leftSimplySupportedRightClamped,\bothSimplySupported,\leftClampedRightFree,\leftFreeRightClamped,\leftSimplySupportedRightFree,\leftFreeRightSimplySupported,\bothFree]
+		validBoundaryConds = #['CC', 'CS', 'CF', 'SC', 'SS', 'SF', 'FC', 'FS', 'FF'];
 	}
 
 	boundaryCond_ { arg newBoundaryCond;
@@ -16,8 +16,7 @@ Resonator1D : ResonatorBase {
 
 	jsonString {
 		var bcStr = boundaryCond.asString;
-		bcStr[0] = bcStr[0].toUpper;
+		bcStr = bcStr.toUpper;
 		^"{ \"dim\":" ++ 1 ++ ",\"gamma\":" ++ gamma ++ ",\"kappa\":" ++ kappa ++ ",\"b1\":" ++ b1 ++ ",\"b2\":" ++ b2 ++ ",\"bc\":" ++ "\"" ++ bcStr ++ "\" }"
 	}
-
 }

@@ -4,7 +4,7 @@ ResonatorNetwork {
 
 	*initClass {
 		Class.initClassTree(String);
-		pythonScriptPath = this.class.filenameSymbol.asString.dirname ++ "/python";
+		pythonScriptPath = this.class.filenameSymbol.asString.dirname;
 		pythonPath = "/System/Library/Frameworks/Python.framework/Versions/Current/bin/python"
 	}
 
@@ -92,11 +92,12 @@ ResonatorNetwork {
 		}
 	}
 
-	calcModalData { arg minFreq=25,maxFreq=(Server.default.sampleRate ? 44100).div(2),minT60=0.01,gain=1,pathname=pythonScriptPath ++ "/modalData.json",incl="ynnn",async=false;
+	calcModalData { arg minFreq=25,maxFreq=22050,minT60=0.01,gain=1,pathname=pythonScriptPath ++ "/modalData.json",incl="ynnn",async=false;
 		var cmdSeq;
 		this.prCheckMatrixDimensions;
 		this.prParseArgsAsJSON(minFreq,maxFreq,minT60,gain,pathname,incl);
-		cmdSeq = "cd" + pythonScriptPath.shellQuote + "&&" + pythonPath.shellQuote + "systemSetup.py && rm -rf networkArgs.json";
+		cmdSeq = "cd % && % -m pmlib -s % % %".format(
+			pythonScriptPath, pythonPath, maxFreq * 2, "networkArgs.json", pathname);
 		async.if { cmdSeq.unixCmd } { cmdSeq.systemCmd };
 		this.prParseModalData(pathname)
 	}
